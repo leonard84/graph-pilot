@@ -1,0 +1,13 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "types": [
+            "bun-types" // add Bun global https://github.com/oven-sh/bun/issues/5674 and https://github.com/oven-sh/bun/issues/4890
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.test.ts"
+    ], 
+    "exclude": []
+}
