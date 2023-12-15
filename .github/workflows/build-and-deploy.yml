@@ -53,6 +53,12 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact 📥
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - run: ls -la artifacts
+      
       - name: Deploy to GitHub Pages 📤
         id: deployment
         uses: actions/deploy-pages@v3
