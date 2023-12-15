@@ -6,14 +6,15 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build-and-package:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -27,9 +28,29 @@ jobs:
 
       - name: Build 🛠️
         run: bun bundle
-
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+      
+      - name: Package results 📦
+        uses: actions/upload-artifact@v4
         with:
-          branch: gh-pages
-          folder: build
+          name: gh-pages
+          path: build
+
+  deploy-to-github-pages:
+    # Add a dependency to the build job
+    needs: build-and-package
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages 📤
+        id: deployment
+        uses: actions/deploy-pages@v3
