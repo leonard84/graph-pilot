@@ -1,9 +1,12 @@
 import cytoscape, { ElementDefinition } from 'cytoscape';
+import Graph from './Graph';
 
 
 document.getElementById('generateGraph')!.addEventListener('click', () => {
     const input: string = (document.getElementById('graphInput') as HTMLInputElement).value;
-    const elements: ElementDefinition[] = parseGraphNotation(input);
+    const graph: Graph = new Graph();
+    graph.parseGraph(input);
+    const elements: ElementDefinition[] = graph.exportToCytoscape();
     const cy = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,

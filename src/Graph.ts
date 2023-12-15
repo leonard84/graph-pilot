@@ -1,3 +1,4 @@
+import { ElementDefinition } from 'cytoscape';
 import Node from './Node';
 
 /*
@@ -52,6 +53,35 @@ class Graph {
             }
         }
     }
+
+    exportToCytoscape(): ElementDefinition[] {
+        const cytoscapeGraph: ElementDefinition[] = [];
+
+        for (const node of this.nodes) {
+            cytoscapeGraph.push({
+                data: {
+                    id: node.key,
+                    label: node.label,
+                    ...node.metadata
+                }
+            });
+
+            const edges = this.adjacencyMatrix.get(node.key);
+            if (edges) {
+                for (const [toKey, weight] of edges.entries()) {
+                    cytoscapeGraph.push({
+                        data: {
+                            source: node.key,
+                            target: toKey,
+                            weight
+                        }
+                    });
+                }
+            }
+        }
+
+        return cytoscapeGraph;
+    }
 }
-    
+
 export default Graph;
