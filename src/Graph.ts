@@ -82,10 +82,20 @@ class Graph {
     }
 
     calculateEdgeWeights(): void {
-        for (const [fromKey, fromNodeEdges] of this.adjacencyMatrix.entries()) {
-            for (const [toKey] of fromNodeEdges.entries()) {
-                const weight = Graph.calculateEdgeWeight(fromKey, toKey);
-                this.addEdge(fromKey, toKey, weight);
+        // using nodes
+        for (const fromNode of this.nodes) {
+            const fromNodeEdges = this.adjacencyMatrix.get(fromNode.key);
+            if (!fromNodeEdges) {
+                continue;
+            }
+
+            for (const toNode of this.nodes) {
+                if (fromNode.key === toNode.key) {
+                    continue;
+                }
+
+                const weight = Graph.calculateEdgeWeight(fromNode.key, toNode.key);
+                fromNodeEdges.set(toNode.key, weight);
             }
         }
     }
