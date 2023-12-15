@@ -1,0 +1,22 @@
+{
+  "name": "graph-pilot",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/cytoscape": "^3.19.16",
+    "@types/node": "^20.10.4",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.2",
+    "cytoscape": "^3.28.0"
+  },
+  "scripts": {
+    "bundle": "rm -rf build && bun build --entry src/index.ts --outdir ./build --format esm --minify --sourcemap --target browser && cp -r public/index.html build && cp node_modules/bootstrap/dist/css/bootstrap.min.css build/bootstrap.min.css",
+    "dev": "bun build --entry src/index.ts --outdir ./build --format esm --sourcemap --target browser --watch",
+    "start": "bun run"
+  }
+}
