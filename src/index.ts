@@ -6,6 +6,8 @@ document.getElementById('generateGraph')!.addEventListener('click', () => {
     const input: string = (document.getElementById('graphInput') as HTMLInputElement).value;
     const graph: Graph = new Graph();
     graph.parseGraph(input);
+    graph.calculateEdgeWeights();
+    console.log(graph.toString());
     const elements: ElementDefinition[] = graph.exportToCytoscape();
     const cy = cytoscape({
         container: document.getElementById('cy'),
