@@ -11,6 +11,8 @@ const colorPalette = [
 const maxWeight = 5;
 
 const container: HTMLElement = document.getElementById('cy')!;
+const pathElement: HTMLElement = document.getElementById('path')!;
+const pathListElement: HTMLElement = document.getElementById('pathList')!;
 const generateGraphButton: HTMLElement = document.getElementById('generateGraph')!;
 const graphStyle = [
     {
@@ -115,12 +117,45 @@ function createGraph(graph: Graph) {
             node.addClass('on-path');
             hideIncommingEdgesAndHighlightOutgoingEdges(node.id());
             highlightPath(selected);
+            addPathElement(node.id());
+            updatePathProgressElement();
         } else {
             removeNodeFromPath(node.id());
             highlightPath(selected);
+            updatePathProgressElement();
         }
     });
-    
+
+    function updatePathProgressElement() {
+        let path = '';
+        if (selected.length > 0) {
+            path = selected[0];
+        }
+        for (let i = 1; i < selected.length; i++) {
+            path += selected[i].substring(Graph.calculateEdgeWeight(selected[i - 1], selected[i]));
+        }
+        pathElement.textContent = addSpaces(path);
+    }
+
+    function addSpaces(str: string) {
+        return str.replace(/(.{4})/g, '$1 ');
+    }
+
+    function addPathElement(nodeId: string) {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.id = nodeId;
+        li.textContent = nodeId;
+        pathListElement.appendChild(li);
+    }
+
+    function removePathElement(nodeId: string) {
+        const li = document.getElementById(nodeId);
+        if (li) {
+            pathListElement.removeChild(li);
+        }
+    }
+
     function removeNodeFromPath(nodeId: string) {
         const index = selected.indexOf(nodeId);
         if (index !== -1) {
@@ -129,6 +164,7 @@ function createGraph(graph: Graph) {
                 const node = cy.getElementById(removedNode);
                 node.removeClass('on-path');
                 showIncommingEdgesAndRemoveOutgoingEdges(removedNode);
+                removePathElement(removedNode);
             });
         }
         if (selected.length > 0) {
@@ -161,7 +197,7 @@ function createGraph(graph: Graph) {
         outgoingEdges.removeClass('on-path');
         outgoingEdges.removeClass('from-selected');
     }
-    
+
 
     function highlightPath(selected: string[]) {
         const filter = generatePairwiseEntries(selected)
