@@ -108,7 +108,7 @@ class Graph {
                 data: {
                     id: node.key,
                     label: node.label,
-                    ...node.metadata
+                    metadata: node.metadata
                 }
             });
 
