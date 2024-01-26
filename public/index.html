@@ -35,7 +35,12 @@
             <label for="graphInput" class="form-label">Graph Data</label>
             <textarea class="form-control" id="graphInput" placeholder="label: KEY {metdata}" rows="10"></textarea>
         </div>
-        <button id="generateGraph" class="btn btn-primary">Generate Graph</button>
+        <div class="form-check form-switch">
+            <input type="checkbox" id="dynamicLayout" class="form-check-input" checked>Dynamic Layout</checkbox>
+            </div>
+        <div>
+            <button id="generateGraph" class="btn btn-primary">Generate Graph</button>
+        </div>
     </div>
     <div id="cy" style="width: 100%; height: 1000px;"></div>
     <div class="container mt-4 mb-4">

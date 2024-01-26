@@ -1,4 +1,4 @@
-import cytoscape, { ElementDefinition } from 'cytoscape';
+import cytoscape, { ElementDefinition, EventObjectNode } from 'cytoscape';
 import Graph from './Graph';
 
 const colorPalette = [
@@ -14,6 +14,7 @@ const container: HTMLElement = document.getElementById('cy')!;
 const pathElement: HTMLElement = document.getElementById('path')!;
 const pathListElement: HTMLElement = document.getElementById('pathList')!;
 const generateGraphButton: HTMLElement = document.getElementById('generateGraph')!;
+const dynamicLayoutToggle: HTMLInputElement = document.getElementById('dynamicLayout') as HTMLInputElement;
 const graphStyle = [
     {
         selector: 'node',
@@ -88,6 +89,10 @@ function parseAndDisplayGraph(input: string) {
     createGraph(graph);
 }
 
+function useDynamicLayout() {
+    return dynamicLayoutToggle.checked;
+}
+
 function createGraph(graph: Graph) {
     const elements: ElementDefinition[] = graph.exportToCytoscape();
     const selected: string[] = [];
@@ -99,7 +104,7 @@ function createGraph(graph: Graph) {
             name: 'grid',
         }
     });
-    cy.on('tap', 'node', function (evt) {
+    cy.on('tap', 'node', function (evt: EventObjectNode) {
         var node = evt.target;
         console.log('tapped ' + node.id());
         console.log(node.data());
@@ -119,12 +124,67 @@ function createGraph(graph: Graph) {
             highlightPath(selected);
             addPathElement(node.id());
             updatePathProgressElement();
+
+            updateLayout(node);
         } else {
             removeNodeFromPath(node.id());
             highlightPath(selected);
             updatePathProgressElement();
+            if (selected.length > 0) {
+                const previousNode = cy.getElementById(selected[selected.length - 1]);
+                updateLayout(previousNode);
+            } else {
+                resetToGrid();
+            }
         }
     });
+
+    function resetToGrid() {
+        cy.layout({
+            name: 'grid',
+        }).run();
+    }
+
+    function updateLayout(node: cytoscape.NodeSingular) {
+        if (!useDynamicLayout()) return;
+
+        const layoutPositions: { [id: string]: cytoscape.Position; } = {};
+        const excluded = new Set(selected);
+        // Assign positions based on your criteria
+        selected.forEach((n, index) => {
+            layoutPositions[n] = { x: 100 * index, y: 0 + (100 * (index & 1)) };
+        });
+        const baseX = 100 * selected.length;
+        layoutPositions[node.id()] = { x: baseX, y: 0 };
+        excluded.add(node.id());
+
+        const reachable = node.outgoers('edge')
+            .sort((a, b) => b.data('weight') - a.data('weight'));
+
+        // Move all reachable nodes to the right of the selected nodes
+        reachable
+            .filter((e) => !excluded.has(e.target().id())) // hide all already selected nodes
+            .forEach((edge, index) => {
+                const target = edge.target();
+                layoutPositions[target.id()] = { x: baseX + 1000 - 100 * edge.data('weight'), y: 50 * index };
+                excluded.add(target.id());
+            });
+
+        cy.nodes()
+            .filter((n) => !excluded.has(n.id())) // hide all already positioned nodes
+            .forEach((n, index) => {
+                layoutPositions[n.id()] = { x: 50 * index, y: reachable.size() * 50 + 100 + (50 * (index & 1)) };
+            });
+
+        // Apply a layout that sets nodes to the specified positions
+        const layout = cy.layout({
+            name: 'preset',
+            positions: layoutPositions, // use the positions calculated above
+            fit: true
+        });
+
+        layout.run();
+    }
 
     function updatePathProgressElement() {
         let path = '';
